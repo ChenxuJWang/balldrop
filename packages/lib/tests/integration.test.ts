@@ -473,7 +473,11 @@ describe('createBallAnimation', () => {
 
       const animation = createBallAnimation(config);
 
+      // Update debug mode
       expect(() => animation.updateConfig({ debug: true })).not.toThrow();
+      
+      // Verify it can be toggled back
+      expect(() => animation.updateConfig({ debug: false })).not.toThrow();
 
       animation.destroy();
     });

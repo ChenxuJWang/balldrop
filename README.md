@@ -216,6 +216,8 @@ This monorepo contains:
 
 ## Development
 
+### Setup
+
 ```bash
 # Install dependencies
 npm install
@@ -225,6 +227,33 @@ npm test
 
 # Build all packages
 npm run build
+```
+
+### Running Demos
+
+The HTML demo files in `docs/` require a dev server to run properly due to ES module restrictions.
+
+**Recommended approach:**
+
+```bash
+# Use Vite dev server (handles TypeScript automatically)
+npx vite docs/zones-demo.html
+
+# Or run the main docs index
+npx vite docs/index.html
+```
+
+**Alternative approach:**
+
+```bash
+# Build the library first
+npm run build
+
+# Then serve with any HTTP server
+npx http-server docs -p 8000
+```
+
+⚠️ **Important:** Do not open demo HTML files directly with `file://` protocol. This will cause MIME type errors with ES modules. See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for details
 
 # Lint and format
 npm run lint

@@ -282,24 +282,28 @@ export function createBallAnimation(config: AnimationConfig): AnimationInstance 
       
       // Update debug mode
       if (partialConfig.debug !== undefined) {
-        (renderer as any).config.debug = partialConfig.debug;
+        renderer.setDebug(partialConfig.debug);
       }
       
       // Update light position
       if (partialConfig.light !== undefined) {
-        (renderer as any).config.light = partialConfig.light;
+        renderer.setLight(partialConfig.light);
       }
       
       // Update shadow options
       if (partialConfig.shadow !== undefined) {
+        // Merge with existing shadow options
+        const mergedShadow = { ...fullConfig.shadow, ...partialConfig.shadow };
+        fullConfig.shadow = mergedShadow;
+        
         // Recreate shadow calculator with new options
         const newShadowCalculator = createShadowCalculator(
-          { ...fullConfig.shadow, ...partialConfig.shadow },
+          mergedShadow,
           canvas.width,
           canvas.height,
           ballStyle.radiusAtGround
         );
-        (renderer as any).config.shadowCalculator = newShadowCalculator;
+        renderer.setShadowCalculator(newShadowCalculator);
       }
       
       // Update ball style
@@ -308,7 +312,11 @@ export function createBallAnimation(config: AnimationConfig): AnimationInstance 
           ...ballStyle,
           ...partialConfig.ballStyle,
         };
-        (renderer as any).config.ballStyle = updatedBallStyle;
+        
+        // Update the local ballStyle reference
+        Object.assign(ballStyle, updatedBallStyle);
+        
+        renderer.setBallStyle(updatedBallStyle);
         
         // Update shadow calculator if radius changed
         if (partialConfig.ballStyle.radiusAtGround !== undefined) {
@@ -318,7 +326,7 @@ export function createBallAnimation(config: AnimationConfig): AnimationInstance 
             canvas.height,
             updatedBallStyle.radiusAtGround
           );
-          (renderer as any).config.shadowCalculator = newShadowCalculator;
+          renderer.setShadowCalculator(newShadowCalculator);
         }
       }
       
@@ -334,7 +342,7 @@ export function createBallAnimation(config: AnimationConfig): AnimationInstance 
           interactionManager.addZone(zone);
         }
         
-        (renderer as any).config.zones = partialConfig.zones;
+        renderer.setZones(partialConfig.zones);
         fullConfig.zones = partialConfig.zones;
       }
     },

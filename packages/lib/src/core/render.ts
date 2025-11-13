@@ -158,6 +158,41 @@ export class Renderer {
   }
   
   /**
+   * Update debug mode.
+   */
+  setDebug(enabled: boolean): void {
+    this.config.debug = enabled;
+  }
+  
+  /**
+   * Update light position.
+   */
+  setLight(light: LightSource): void {
+    this.config.light = light;
+  }
+  
+  /**
+   * Update ball style.
+   */
+  setBallStyle(ballStyle: Required<BallStyle>): void {
+    this.config.ballStyle = ballStyle;
+  }
+  
+  /**
+   * Update shadow calculator.
+   */
+  setShadowCalculator(shadowCalculator: ShadowCalculator): void {
+    this.config.shadowCalculator = shadowCalculator;
+  }
+  
+  /**
+   * Update zones.
+   */
+  setZones(zones: InteractiveZone[]): void {
+    this.config.zones = zones;
+  }
+  
+  /**
    * Clean up resources.
    */
   destroy(): void {

@@ -1,5 +1,19 @@
 <!DOCTYPE html>
+<!--
+  DEVELOPMENT NOTE:
+  This demo file requires a dev server to run properly.
+  
+  Quick Start:
+    npx vite docs/zones-demo.html
+  
+  Or build the library first:
+    npm run build
+    Then update the import to use: ../packages/lib/dist/index.js
+  
+  See docs/DEVELOPMENT.md for more details.
+-->
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -147,6 +161,7 @@
         opacity: 0;
         transform: translateY(-50px);
       }
+
       to {
         opacity: 1;
         transform: translateY(0);
@@ -178,8 +193,15 @@
     }
 
     @keyframes flashEffect {
-      0%, 100% { filter: brightness(1); }
-      50% { filter: brightness(1.5); }
+
+      0%,
+      100% {
+        filter: brightness(1);
+      }
+
+      50% {
+        filter: brightness(1.5);
+      }
     }
 
     .event-log {
@@ -216,17 +238,32 @@
       border-bottom: none;
     }
 
-    .event-enter { color: #10b981; }
-    .event-exit { color: #ef4444; }
-    .event-click { color: #3b82f6; }
-    .event-peak { color: #f59e0b; }
-    .event-valley { color: #8b5cf6; }
+    .event-enter {
+      color: #10b981;
+    }
+
+    .event-exit {
+      color: #ef4444;
+    }
+
+    .event-click {
+      color: #3b82f6;
+    }
+
+    .event-peak {
+      color: #f59e0b;
+    }
+
+    .event-valley {
+      color: #8b5cf6;
+    }
   </style>
 </head>
+
 <body>
   <h1>🎯 Interactive Zones Demo</h1>
   <p class="description">
-    This demo showcases interactive zones with the Ball Animation Library. 
+    This demo showcases interactive zones with the Ball Animation Library.
     Watch the info panel as the ball moves through different zones, and try clicking on the zones!
   </p>
 
@@ -259,52 +296,278 @@
   <div id="modal" class="modal">
     <div class="modal-content">
       <h2>🎉 Zone Clicked!</h2>
-      <p>You clicked on an interactive zone. This could trigger navigation, open a form, or perform any action you need.</p>
+      <p>You clicked on an interactive zone. This could trigger navigation, open a form, or perform any action you need.
+      </p>
       <button onclick="closeModal()">Close</button>
     </div>
   </div>
 
   <script type="module">
-    // This is a demo - in production, import from the actual library
+    // NOTE: This demo requires the library to be built first.
+    // Run: npm run build
+    // Then serve this file with a local server that supports ES modules.
+    // For development, use: npx vite docs/zones-demo.html
+
+    // TODO: Replace with actual import once library is published to npm
     // import { createBallAnimation } from '@ballfx/core';
-    
-    // For demo purposes, we'll show the expected behavior
-    console.log('Interactive Zones Demo');
-    console.log('This demo shows how zones work with the Ball Animation Library');
-    
+
+    // For now, we'll use a placeholder that shows the expected API
+    console.warn('Demo is in placeholder mode. Build the library and use a dev server to see it working.');
+
+    // Placeholder createBallAnimation function for demo purposes
+    function createBallAnimation(config) {
+      console.log('Animation configuration:', config);
+
+      // Create a simple canvas visualization
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      config.mount.appendChild(canvas);
+
+      // Size canvas
+      canvas.width = config.mount.clientWidth;
+      canvas.height = config.mount.clientHeight;
+      canvas.style.width = '100%';
+      canvas.style.height = '100%';
+
+      let isPlaying = false;
+      let isPaused = false;
+      let progress = 0;
+      let animationId = null;
+      
+      // Track zone states for enter/exit events
+      const zoneStates = new Map();
+      if (config.zones) {
+        config.zones.forEach(zone => {
+          zoneStates.set(zone.id, { isInside: false });
+        });
+      }
+
+      function animate() {
+        if (!isPlaying || isPaused) return;
+
+        // Clear canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Update progress
+        progress += 0.001;
+        if (progress > 1) progress = 0;
+
+        // Calculate ball position
+        const x = canvas.width / 2;
+        const y = progress * canvas.height;
+        const z = Math.sin(progress * Math.PI * 2);
+        const radius = 20 + z * 20;
+
+        // Draw shadow
+        ctx.fillStyle = `rgba(0, 0, 0, ${0.3 * (1 - z)})`;
+        ctx.beginPath();
+        ctx.arc(x, y + 10, radius * 0.8, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Draw ball
+        ctx.fillStyle = config.ballStyle?.fill || '#a78bfa';
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Draw debug overlay if enabled
+        if (config.debug) {
+          // Draw light source
+          const lightX = (config.light?.x || 0.5) * canvas.width;
+          const lightY = (config.light?.y || 0.5) * canvas.height;
+          ctx.strokeStyle = '#fbbf24';
+          ctx.fillStyle = 'rgba(251, 191, 36, 0.3)';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(lightX, lightY, 10, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+
+          // Draw light rays to ball
+          ctx.strokeStyle = 'rgba(251, 191, 36, 0.3)';
+          ctx.lineWidth = 1;
+          ctx.setLineDash([5, 5]);
+          ctx.beginPath();
+          ctx.moveTo(lightX, lightY);
+          ctx.lineTo(x, y);
+          ctx.stroke();
+          ctx.setLineDash([]);
+
+          // Draw zones
+          if (config.zones) {
+            config.zones.forEach(zone => {
+              ctx.strokeStyle = '#8b5cf6';
+              ctx.fillStyle = 'rgba(139, 92, 246, 0.1)';
+              ctx.lineWidth = 2;
+
+              if (zone.shape === 'circle' && zone.bounds.radius) {
+                const zoneX = zone.bounds.x * canvas.width;
+                const zoneY = zone.bounds.y * canvas.height;
+                const zoneRadius = zone.bounds.radius * Math.min(canvas.width, canvas.height);
+
+                ctx.beginPath();
+                ctx.arc(zoneX, zoneY, zoneRadius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+
+                // Draw zone label
+                ctx.fillStyle = '#8b5cf6';
+                ctx.font = '12px monospace';
+                ctx.fillText(zone.id, zoneX - 20, zoneY - zoneRadius - 5);
+              } else if (zone.shape === 'rect' && zone.bounds.width && zone.bounds.height) {
+                const zoneX = zone.bounds.x * canvas.width;
+                const zoneY = zone.bounds.y * canvas.height;
+                const zoneWidth = zone.bounds.width * canvas.width;
+                const zoneHeight = zone.bounds.height * canvas.height;
+
+                ctx.fillRect(zoneX, zoneY, zoneWidth, zoneHeight);
+                ctx.strokeRect(zoneX, zoneY, zoneWidth, zoneHeight);
+
+                // Draw zone label
+                ctx.fillStyle = '#8b5cf6';
+                ctx.font = '12px monospace';
+                ctx.fillText(zone.id, zoneX + 5, zoneY - 5);
+              }
+            });
+          }
+
+          // Draw ball crosshair
+          ctx.strokeStyle = '#ef4444';
+          ctx.lineWidth = 1;
+          const crosshairSize = 15;
+
+          ctx.beginPath();
+          ctx.moveTo(x - crosshairSize, y);
+          ctx.lineTo(x + crosshairSize, y);
+          ctx.stroke();
+
+          ctx.beginPath();
+          ctx.moveTo(x, y - crosshairSize);
+          ctx.lineTo(x, y + crosshairSize);
+          ctx.stroke();
+
+          // Draw info panel
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+          ctx.fillRect(10, 10, 200, 100);
+
+          ctx.fillStyle = '#ffffff';
+          ctx.font = '12px monospace';
+          ctx.fillText(`Progress: ${(progress * 100).toFixed(1)}%`, 20, 30);
+          ctx.fillText(`Position: (${(x / canvas.width).toFixed(2)}, ${(y / canvas.height).toFixed(2)})`, 20, 50);
+          ctx.fillText(`Z Height: ${z.toFixed(2)}`, 20, 70);
+          ctx.fillText(`Radius: ${radius.toFixed(1)}px`, 20, 90);
+        }
+
+        // Check zones and trigger callbacks
+        if (config.zones) {
+          config.zones.forEach(zone => {
+            const state = zoneStates.get(zone.id);
+            let isInside = false;
+
+            if (zone.shape === 'circle' && zone.bounds.radius) {
+              const zoneX = zone.bounds.x * canvas.width;
+              const zoneY = zone.bounds.y * canvas.height;
+              const dist = Math.sqrt((x - zoneX) ** 2 + (y - zoneY) ** 2);
+              const zoneRadius = zone.bounds.radius * Math.min(canvas.width, canvas.height);
+              isInside = dist <= zoneRadius;
+            } else if (zone.shape === 'rect' && zone.bounds.width && zone.bounds.height) {
+              const zoneX = zone.bounds.x * canvas.width;
+              const zoneY = zone.bounds.y * canvas.height;
+              const zoneWidth = zone.bounds.width * canvas.width;
+              const zoneHeight = zone.bounds.height * canvas.height;
+              isInside = x >= zoneX && x <= zoneX + zoneWidth && 
+                         y >= zoneY && y <= zoneY + zoneHeight;
+            }
+
+            // Handle enter/exit events
+            if (isInside && !state.isInside) {
+              state.isInside = true;
+              if (zone.onEnter) {
+                try {
+                  zone.onEnter(zone);
+                } catch (error) {
+                  console.error(`Error in onEnter for ${zone.id}:`, error);
+                }
+              }
+            } else if (!isInside && state.isInside) {
+              state.isInside = false;
+              if (zone.onExit) {
+                try {
+                  zone.onExit(zone);
+                } catch (error) {
+                  console.error(`Error in onExit for ${zone.id}:`, error);
+                }
+              }
+            }
+          });
+        }
+
+        animationId = requestAnimationFrame(animate);
+      }
+
+      return {
+        play() {
+          isPlaying = true;
+          isPaused = false;
+          animate();
+        },
+        pause() {
+          isPaused = true;
+        },
+        stop() {
+          isPlaying = false;
+          isPaused = false;
+          progress = 0;
+          if (animationId) cancelAnimationFrame(animationId);
+        },
+        setProgress(p) {
+          progress = p;
+        },
+        updateConfig(newConfig) {
+          Object.assign(config, newConfig);
+        },
+        destroy() {
+          this.stop();
+          if (canvas.parentElement) {
+            canvas.parentElement.removeChild(canvas);
+          }
+        }
+      };
+    }
+
     // Event logging
     let peakCount = 0;
     let valleyCount = 0;
     const eventList = document.getElementById('event-list');
-    
+
     function logEvent(type, message) {
       const li = document.createElement('li');
       li.className = `event-${type}`;
       li.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
       eventList.insertBefore(li, eventList.firstChild);
-      
+
       // Keep only last 20 events
       while (eventList.children.length > 20) {
         eventList.removeChild(eventList.lastChild);
       }
     }
-    
+
     function updateZoneStatus(zoneId, isInside) {
       const statusEl = document.getElementById(`zone${zoneId}-status`);
       statusEl.textContent = isInside ? 'Inside' : 'Outside';
       statusEl.className = isInside ? 'status' : 'status inactive';
     }
-    
+
     function showModal() {
       document.getElementById('modal').classList.add('show');
     }
-    
-    window.closeModal = function() {
+
+    window.closeModal = function () {
       document.getElementById('modal').classList.remove('show');
     }
-    
-    // Simulated animation configuration
-    const config = {
+
+    // Create animation with interactive zones
+    const animation = createBallAnimation({
       mount: document.getElementById('canvas-container'),
       driver: 'time',
       durationMs: 5000,
@@ -384,41 +647,47 @@
         }
       ],
       debug: true
-    };
-    
-    // Log configuration
-    console.log('Animation Configuration:', config);
-    logEvent('enter', 'Demo initialized - waiting for library implementation');
-    
+    });
+
+    // Start the animation
+    animation.play();
+    logEvent('enter', 'Animation started with interactive zones');
+
     // Control buttons
     document.getElementById('play-btn').addEventListener('click', () => {
       logEvent('click', 'Play button clicked');
-      // animation.play();
+      animation.play();
     });
-    
+
     document.getElementById('pause-btn').addEventListener('click', () => {
       logEvent('click', 'Pause button clicked');
-      // animation.pause();
+      animation.pause();
     });
-    
+
     document.getElementById('stop-btn').addEventListener('click', () => {
       logEvent('click', 'Stop button clicked');
-      // animation.stop();
+      animation.stop();
     });
-    
+
     let debugEnabled = true;
     document.getElementById('debug-btn').addEventListener('click', () => {
       debugEnabled = !debugEnabled;
       logEvent('click', `Debug mode ${debugEnabled ? 'enabled' : 'disabled'}`);
-      // animation.updateConfig({ debug: debugEnabled });
+      animation.updateConfig({ debug: debugEnabled });
     });
-    
+
     // Close modal on click outside
     document.getElementById('modal').addEventListener('click', (e) => {
       if (e.target.id === 'modal') {
         closeModal();
       }
     });
+
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', () => {
+      animation.destroy();
+    });
   </script>
 </body>
+
 </html>
