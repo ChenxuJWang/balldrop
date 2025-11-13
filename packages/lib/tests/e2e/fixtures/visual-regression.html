@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visual Regression Test</title>
+  <style>
+    body { margin: 0; padding: 20px; font-family: sans-serif; background: #f5f5f5; }
+    .test-case { margin-bottom: 20px; }
+    .test-case h3 { margin: 0 0 10px 0; }
+    .container { 
+      width: 400px; 
+      height: 400px; 
+      border: 1px solid #ccc; 
+      background: white;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+  <div class="test-case">
+    <h3>Low Z (Ground Level)</h3>
+    <div id="container-low" class="container"></div>
+  </div>
+  
+  <div class="test-case">
+    <h3>Mid Z (Half Height)</h3>
+    <div id="container-mid" class="container"></div>
+  </div>
+  
+  <div class="test-case">
+    <h3>High Z (Maximum Height)</h3>
+    <div id="container-high" class="container"></div>
+  </div>
+  
+  <script type="module">
+    import { createBallAnimation } from '../../../dist/index.esm.js';
+    
+    // Low Z animation
+    const animLow = createBallAnimation({
+      mount: document.getElementById('container-low'),
+      driver: 'time',
+      durationMs: 1000,
+      customCurve: () => 0.1, // Stay at low Z
+      light: { x: 0.5, y: 0.5, z: 2.0 },
+    });
+    animLow.play();
+    
+    // Mid Z animation
+    const animMid = createBallAnimation({
+      mount: document.getElementById('container-mid'),
+      driver: 'time',
+      durationMs: 1000,
+      customCurve: () => 0.5, // Stay at mid Z
+      light: { x: 0.5, y: 0.5, z: 2.0 },
+    });
+    animMid.play();
+    
+    // High Z animation
+    const animHigh = createBallAnimation({
+      mount: document.getElementById('container-high'),
+      driver: 'time',
+      durationMs: 1000,
+      customCurve: () => 0.9, // Stay at high Z
+      light: { x: 0.5, y: 0.5, z: 2.0 },
+    });
+    animHigh.play();
+  </script>
+</body>
+</html>

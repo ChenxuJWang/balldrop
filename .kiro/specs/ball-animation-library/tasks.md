@@ -208,29 +208,29 @@
   - Add troubleshooting section to configuration-guide.md
   - _Requirements: 5.5, 5.6, 5.7, 6.6, 12.5, 11.2, 11.3_
 
-- [ ] 12. Add path animation support
+- [x] 12. Add path animation support
   - Implement 2D path functions (xFn, yFn) for ball movement
   - Add default path functions (x=0.5 center, y=t top-to-bottom)
   - Integrate path computation into render loop
   - Write unit tests for path calculations
   - _Requirements: 2.1_
 
-- [ ] 13. Build test suite infrastructure
-- [ ] 13.1 Set up unit test environment
+- [x] 13. Build test suite infrastructure
+- [x] 13.1 Set up unit test environment
   - Configure Vitest with TypeScript support
   - Add vitest-canvas-mock or jsdom-canvas for Canvas API mocking
   - Create test utility functions (createMockCanvas, createMockConfig, etc.)
   - Write example tests to verify setup
   - _Requirements: 10.1, 10.2_
 
-- [ ] 13.2 Set up integration test environment
+- [x] 13.2 Set up integration test environment
   - Configure Playwright for browser-based testing
   - Create test HTML pages with animation examples
   - Write helper functions for timing and scroll simulation
   - Add visual regression test infrastructure
   - _Requirements: 10.3, 10.4, 10.5, 10.6_
 
-- [ ] 13.3 Implement comprehensive test coverage
+- [x] 13.3 Implement comprehensive test coverage
   - Write unit tests for all modules achieving 85%+ coverage
   - Write integration tests for time-based animations
   - Write integration tests for scroll-based animations

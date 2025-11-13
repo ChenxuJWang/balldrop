@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Time-Based Animation Test</title>
+  <style>
+    body { margin: 0; padding: 20px; font-family: sans-serif; }
+    #container { width: 800px; height: 600px; border: 1px solid #ccc; }
+    #status { margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <div id="container"></div>
+  <div id="status">Status: <span id="progress">0</span></div>
+  
+  <script type="module">
+    import { createBallAnimation } from '../../../dist/index.esm.js';
+    
+    const animation = createBallAnimation({
+      mount: document.getElementById('container'),
+      driver: 'time',
+      durationMs: 2000,
+      curvePreset: 'sine',
+      light: { x: 0.5, y: 0.5, z: 2.0 },
+      loop: false,
+    });
+    
+    // Expose for testing
+    window.__ballAnimation = animation;
+    
+    // Update progress display
+    function updateProgress() {
+      const progress = animation.getProgress();
+      document.getElementById('progress').textContent = progress.toFixed(3);
+      requestAnimationFrame(updateProgress);
+    }
+    updateProgress();
+    
+    animation.play();
+  </script>
+</body>
+</html>

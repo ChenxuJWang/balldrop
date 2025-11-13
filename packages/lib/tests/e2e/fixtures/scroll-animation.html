@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scroll-Based Animation Test</title>
+  <style>
+    body { margin: 0; padding: 0; font-family: sans-serif; }
+    #container { 
+      position: fixed; 
+      top: 20px; 
+      left: 20px; 
+      width: 400px; 
+      height: 400px; 
+      border: 1px solid #ccc; 
+    }
+    #spacer { height: 3000px; }
+    #status { 
+      position: fixed; 
+      top: 20px; 
+      right: 20px; 
+      background: white; 
+      padding: 10px; 
+      border: 1px solid #ccc; 
+    }
+  </style>
+</head>
+<body>
+  <div id="container"></div>
+  <div id="status">Progress: <span id="progress">0</span></div>
+  <div id="spacer"></div>
+  
+  <script type="module">
+    import { createBallAnimation } from '../../../dist/index.esm.js';
+    
+    const animation = createBallAnimation({
+      mount: document.getElementById('container'),
+      driver: 'scroll',
+      scrollTarget: document.documentElement,
+      curvePreset: 'linear',
+      light: { x: 0.5, y: 0.5, z: 2.0 },
+    });
+    
+    window.__ballAnimation = animation;
+    
+    function updateProgress() {
+      const progress = animation.getProgress();
+      document.getElementById('progress').textContent = progress.toFixed(3);
+      requestAnimationFrame(updateProgress);
+    }
+    updateProgress();
+  </script>
+</body>
+</html>

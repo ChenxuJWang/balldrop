@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive Zones Test</title>
+  <style>
+    body { margin: 0; padding: 20px; font-family: sans-serif; }
+    #container { width: 800px; height: 600px; border: 1px solid #ccc; }
+    #events { margin-top: 20px; }
+    .event { padding: 5px; margin: 2px 0; background: #f0f0f0; }
+  </style>
+</head>
+<body>
+  <div id="container"></div>
+  <div id="events">
+    <div data-callback="onEnter">onEnter: <span>-</span></div>
+    <div data-callback="onExit">onExit: <span>-</span></div>
+    <div data-callback="onClick">onClick: <span>-</span></div>
+    <div data-callback="onPeak">onPeak: <span>-</span></div>
+  </div>
+  
+  <script type="module">
+    import { createBallAnimation } from '../../../dist/index.esm.js';
+    
+    let enterCount = 0, exitCount = 0, clickCount = 0, peakCount = 0;
+    
+    const animation = createBallAnimation({
+      mount: document.getElementById('container'),
+      driver: 'time',
+      durationMs: 3000,
+      curvePreset: 'sine',
+      light: { x: 0.5, y: 0.5, z: 2.0 },
+      loop: true,
+      zones: [{
+        id: 'test-zone',
+        shape: 'circle',
+        center: { x: 0.5, y: 0.5 },
+        radius: 0.3,
+        onEnter: () => {
+          enterCount++;
+          document.querySelector('[data-callback="onEnter"] span').textContent = 
+            `triggered ${enterCount}x`;
+        },
+        onExit: () => {
+          exitCount++;
+          document.querySelector('[data-callback="onExit"] span').textContent = 
+            `triggered ${exitCount}x`;
+        },
+        onClick: (e) => {
+          clickCount++;
+          document.querySelector('[data-callback="onClick"] span').textContent = 
+            `triggered ${clickCount}x`;
+        },
+        onPeak: () => {
+          peakCount++;
+          document.querySelector('[data-callback="onPeak"] span').textContent = 
+            `triggered ${peakCount}x`;
+        },
+      }],
+    });
+    
+    window.__ballAnimation = animation;
+    animation.play();
+  </script>
+</body>
+</html>
