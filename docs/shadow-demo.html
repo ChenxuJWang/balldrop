@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shadow Configuration Demo - Ball Animation Library</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #333;
+      padding: 2rem;
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    h1 {
+      color: white;
+      text-align: center;
+      margin-bottom: 1rem;
+      font-size: 2.5rem;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    .subtitle {
+      color: rgba(255,255,255,0.9);
+      text-align: center;
+      margin-bottom: 3rem;
+      font-size: 1.1rem;
+    }
+    
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 2rem;
+      margin-bottom: 3rem;
+    }
+    
+    .demo-card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      transition: transform 0.3s ease;
+    }
+    
+    .demo-card:hover {
+      transform: translateY(-5px);
+    }
+    
+    .demo-title {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #667eea;
+    }
+    
+    .demo-description {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 1rem;
+      line-height: 1.5;
+    }
+    
+    .canvas-container {
+      width: 100%;
+      height: 300px;
+      background: linear-gradient(to bottom, #f0f4f8 0%, #d9e2ec 100%);
+      border-radius: 8px;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 1rem;
+    }
+    
+    .params {
+      background: #f8f9fa;
+      border-radius: 6px;
+      padding: 1rem;
+      font-size: 0.85rem;
+      font-family: 'Courier New', monospace;
+    }
+    
+    .params-title {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #495057;
+    }
+    
+    .param-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.25rem 0;
+      border-bottom: 1px solid #e9ecef;
+    }
+    
+    .param-row:last-child {
+      border-bottom: none;
+    }
+    
+    .param-label {
+      color: #6c757d;
+    }
+    
+    .param-value {
+      color: #495057;
+      font-weight: 500;
+    }
+    
+    .info-section {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      margin-bottom: 2rem;
+    }
+    
+    .info-section h2 {
+      color: #667eea;
+      margin-bottom: 1rem;
+    }
+    
+    .info-section p {
+      line-height: 1.6;
+      color: #495057;
+      margin-bottom: 1rem;
+    }
+    
+    .info-section ul {
+      margin-left: 1.5rem;
+      color: #495057;
+    }
+    
+    .info-section li {
+      margin-bottom: 0.5rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f8f9fa;
+      padding: 0.2rem 0.4rem;
+      border-radius: 3px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e83e8c;
+    }
+    
+    .note {
+      background: #fff3cd;
+      border-left: 4px solid #ffc107;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 4px;
+    }
+    
+    .note-title {
+      font-weight: 600;
+      color: #856404;
+      margin-bottom: 0.5rem;
+    }
+    
+    .note-text {
+      color: #856404;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🌟 Shadow Configuration Demo</h1>
+    <p class="subtitle">Explore different shadow configurations and lighting setups</p>
+    
+    <div class="info-section">
+      <h2>About This Demo</h2>
+      <p>
+        This interactive demo showcases various shadow configurations for the Ball Animation Library.
+        Each example demonstrates how different shadow parameters affect the visual appearance of the ball's shadow.
+      </p>
+      <p>
+        The shadow system simulates realistic depth by adjusting three key properties as the ball moves:
+      </p>
+      <ul>
+        <li><strong>Offset:</strong> Distance between ball and shadow (increases with height)</li>
+        <li><strong>Blur:</strong> Softness of shadow edges (increases with height)</li>
+        <li><strong>Opacity:</strong> Shadow transparency (decreases with height)</li>
+        <li><strong>Scale:</strong> Shadow size (decreases with height, clamped by minScale)</li>
+      </ul>
+    </div>
+    
+    <div class="demo-grid">
+      <!-- Demo 1: Default Settings -->
+      <div class="demo-card">
+        <h3 class="demo-title">Default Settings</h3>
+        <p class="demo-description">
+          Standard configuration with balanced shadow properties. Good starting point for most use cases.
+        </p>
+        <div class="canvas-container" id="demo1"></div>
+        <div class="params">
+          <div class="params-title">Configuration:</div>
+          <div class="param-row">
+            <span class="param-label">softness:</span>
+            <span class="param-value">0.5</span>
+          </div>
+          <div class="param-row">
+            <span class="param-label">opacityAtGround:</span>
+            <span class="param-value">0.3</span>
+          </div>
+          <div class="param-row">
+            <span class="param-label">minScale:</span>
+            <span class="param-value">0.1</span>
+          </div>
+          <div class="param-row">
+            <span class="param-label">light.z:</span>
+            <span class="param-value">2.0</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Demo 2: Sharp Shadows -->
+      <div class="demo-card">
+        <h3 class="demo-title">Sharp Shadows</h3>
+        <p class="demo-description">
+          Low softness creates crisp, well-defined shadow edges. Ideal for bright, direct lighting scenarios.
+        </p>
+        <div class="canvas-container" id="demo2"></div>
+        <div class="params">
+          <div class="params-title">Configuration:</div>
+          <div class="param-row">
+            <span class="param-label">softness:</span>
+            <span class="param-value">0.2</span>
+          </div>
+          <div class="param-row">
+            <span class="param-label">opacityAtGround:</span>
+            <span class="param-value">0.5</span>
+          </div>
+          <div class="param-row">
+            <span class="param-label">minScale:</span>
+            <span class="param-value">0.1</span>
+          </div>
+          <div class="param-row">
+            <span class="param-label">light.z:</span>
+            <span class="param-value">2.0</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Demo 3: Soft Shadows -->
+      <div class="demo-card">
+        <h3 class="demo-title">Soft Shadows</h3>
+        <p class="demo-description">
+          High softness creates diffuse, atmospheric shadows. Perfect for indoor or overcast lighting.
+        </p>
+        <div class="canvas-container" id="demo3"></div>
+        <div class="params">
+          <div class="params-title">Configuration:</div>
+          <div class="param-row">
+            <span class="param-label">softness:</span>
+            <span class="param-value">0.9</span>
+          </div>
+          <div class="param-row">
+            <span class="param-label">opacityAtGround:</span>
+            <span class="param-value">0.3</span>
+          </div>
+          <div class="param-row">
+            <span class="param-label">minScale:</span>
+            <span class="param-value">0.25</span>
+          </div>
+          <div class="param-row">
+            <span class="param-label">light.z:</span>
+            <span class="param-value">2.0</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Demo 4: Dramatic Shadow -->
+      <div class="demo-card">
+        <h3 class="demo-title">Dramatic Shadow</h3>
+        <p class="demo-description">
+          High opacity creates a strong, prominent shadow. Great for emphasizing depth and creating contrast.
+        </p>
+        <div class="canvas-container" id="demo4"></div>
+        <div class="params">
+          <div class="params-title">Configuration:</div>
+          <div class="param-row">
+            <span class="param-label">softness:</span>
+            <span class="param-value">0.4</span>
+          </div>
+          <div class="param-row">
+            <span class="param-label">opacityAtGround:</span>
+            <span class="param-value">0.7</span>
+          </div>
+          <div class="param-row">
+            <span class="param-label">minScale:</span>
+            <span class="param-value">0.1</span>
+          </div>
+          <div class="param-row">
+            <span class="param-label">light.z:</span>
+            <span class="param-value">1.5</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Demo 5: Subtle Shadow -->
+      <div class="demo-card">
+        <h3 class="demo-title">Subtle Shadow</h3>
+        <p class="demo-description">
+          Low opacity creates a barely-there shadow. Useful for minimalist designs or floating effects.
+        </p>
+        <div class="canvas-container" id="demo5"></div>
+        <div class="params">
+          <div class="params-title">Configuration:</div>
+          <div class="param-row">
+            <span class="param-label">softness:</span>
+            <span class="param-value">0.7</span>
+          </div>
+          <div class="param-row">
+            <span class="param-label">opacityAtGround:</span>
+            <span class="param-value">0.15</span>
+          </div>
+          <div class="param-row">
+            <span class="param-label">minScale:</span>
+            <span class="param-value">0.3</span>
+          </div>
+          <div class="param-row">
+            <span class="param-label">light.z:</span>
+            <span class="param-value">3.0</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Demo 6: Side Lighting -->
+      <div class="demo-card">
+        <h3 class="demo-title">Side Lighting</h3>
+        <p class="demo-description">
+          Light positioned to the side creates elongated shadows. Simulates sunrise/sunset or stage lighting.
+        </p>
+        <div class="canvas-container" id="demo6"></div>
+        <div class="params">
+          <div class="params-title">Configuration:</div>
+          <div class="param-row">
+            <span class="param-label">softness:</span>
+            <span class="param-value">0.5</span>
+          </div>
+          <div class="param-row">
+            <span class="param-label">opacityAtGround:</span>
+            <span class="param-value">0.4</span>
+          </div>
+          <div class="param-row">
+            <span class="param-label">minScale:</span>
+            <span class="param-value">0.15</span>
+          </div>
+          <div class="param-row">
+            <span class="param-label">light: (0.2, 0.5, 2.0)</span>
+            <span class="param-value">Left side</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Demo 7: Overhead Lighting -->
+      <div class="demo-card">
+        <h3 class="demo-title">Overhead Lighting</h3>
+        <p class="demo-description">
+          High light position creates shadows directly beneath the ball. Simulates noon sun or ceiling lights.
+        </p>
+        <div class="canvas-container" id="demo7"></div>
+        <div class="params">
+          <div class="params-title">Configuration:</div>
+          <div class="param-row">
+            <span class="param-label">softness:</span>
+            <span class="param-value">0.6</span>
+          </div>
+          <div class="param-row">
+            <span class="param-label">opacityAtGround:</span>
+            <span class="param-value">0.35</span>
+          </div>
+          <div class="param-row">
+            <span class="param-label">minScale:</span>
+            <span class="param-value">0.2</span>
+          </div>
+          <div class="param-row">
+            <span class="param-label">light.z:</span>
+            <span class="param-value">4.0</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Demo 8: Persistent Shadow -->
+      <div class="demo-card">
+        <h3 class="demo-title">Persistent Shadow</h3>
+        <p class="demo-description">
+          High minScale keeps shadow visible at all heights. Prevents shadow from disappearing when ball is high.
+        </p>
+        <div class="canvas-container" id="demo8"></div>
+        <div class="params">
+          <div class="params-title">Configuration:</div>
+          <div class="param-row">
+            <span class="param-label">softness:</span>
+            <span class="param-value">0.5</span>
+          </div>
+          <div class="param-row">
+            <span class="param-label">opacityAtGround:</span>
+            <span class="param-value">0.4</span>
+          </div>
+          <div class="param-row">
+            <span class="param-label">minScale:</span>
+            <span class="param-value">0.5</span>
+          </div>
+          <div class="param-row">
+            <span class="param-label">light.z:</span>
+            <span class="param-value">2.0</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="info-section">
+      <h2>Understanding Shadow Parameters</h2>
+      
+      <h3 style="color: #495057; margin-top: 1.5rem;">Softness (0-1)</h3>
+      <p>
+        Controls the blur radius of the shadow. Lower values create sharp, defined edges while higher values 
+        create soft, diffuse shadows. This parameter is multiplied by the ball's height to create more blur 
+        as the ball rises.
+      </p>
+      
+      <h3 style="color: #495057; margin-top: 1.5rem;">Opacity at Ground (0-1)</h3>
+      <p>
+        Sets the maximum shadow opacity when the ball is at ground level (Z=0). As the ball rises, opacity 
+        decreases exponentially. Use higher values for dramatic shadows and lower values for subtle effects.
+      </p>
+      
+      <h3 style="color: #495057; margin-top: 1.5rem;">Minimum Scale (0-1)</h3>
+      <p>
+        Prevents the shadow from shrinking too much at maximum height. This value represents the minimum 
+        shadow size as a fraction of the ball's radius. Higher values keep shadows more visible at all heights.
+      </p>
+      
+      <h3 style="color: #495057; margin-top: 1.5rem;">Light Position</h3>
+      <p>
+        The light's Z coordinate affects shadow behavior. Higher Z values create more overhead lighting with 
+        smaller shadow offsets, while lower Z values create more dramatic side lighting with larger offsets.
+      </p>
+      
+      <div class="note">
+        <div class="note-title">💡 Pro Tip</div>
+        <div class="note-text">
+          Experiment with combining different parameters to achieve unique effects. For example, pairing high 
+          <code>softness</code> with low <code>opacityAtGround</code> creates an ethereal, floating appearance, 
+          while low <code>softness</code> with high <code>opacityAtGround</code> creates bold, graphic shadows.
+        </div>
+      </div>
+    </div>
+    
+    <div class="info-section">
+      <h2>Implementation Notes</h2>
+      <p>
+        This demo page is a visual reference showing static representations of different shadow configurations.
+        In the actual Ball Animation Library, these shadows animate smoothly as the ball moves through its path,
+        with all parameters updating in real-time based on the ball's current height.
+      </p>
+      <p>
+        To implement these configurations in your project, use the <code>shadow</code> property in your 
+        <code>AnimationConfig</code> object. See the 
+        <a href="./advanced-topics.md" style="color: #667eea;">Advanced Topics guide</a> for complete code examples.
+      </p>
+    </div>
+  </div>
+  
+  <script>
+    // This is a static demo page showing shadow configuration examples
+    // In a real implementation, you would import and use the Ball Animation Library here
+    
+    // For now, we'll create visual representations using canvas
+    function drawShadowDemo(canvasId, config) {
+      const container = document.getElementById(canvasId);
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      // Set canvas size
+      const dpr = window.devicePixelRatio || 1;
+      const rect = container.getBoundingClientRect();
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      canvas.style.width = rect.width + 'px';
+      canvas.style.height = rect.height + 'px';
+      ctx.scale(dpr, dpr);
+      
+      container.appendChild(canvas);
+      
+      // Animation parameters
+      let t = 0;
+      const ballRadius = 25;
+      
+      function animate() {
+        // Clear canvas
+        ctx.clearRect(0, 0, rect.width, rect.height);
+        
+        // Calculate ball position (sine wave for height)
+        const x = rect.width / 2;
+        const y = rect.height / 2;
+        const z = (Math.sin(t) + 1) / 2; // 0 to 1
+        
+        // Calculate shadow parameters based on config
+        const shadowBlur = z * config.softness * ballRadius * 1.5;
+        const shadowOpacity = config.opacityAtGround * Math.exp(-2 * z);
+        const shadowScale = 1 - z * (1 - config.minScale);
+        
+        // Calculate shadow offset based on light position
+        const lightX = config.light.x * rect.width;
+        const lightY = config.light.y * rect.height;
+        const lightZ = config.light.z * rect.height;
+        
+        const dx = x - lightX;
+        const dy = y - lightY;
+        const dz = z * rect.height - lightZ;
+        
+        const shadowT = -lightZ / dz;
+        const shadowX = lightX + shadowT * dx;
+        const shadowY = lightY + shadowT * dy;
+        
+        const offsetX = shadowX - x;
+        const offsetY = shadowY - y;
+        
+        // Draw shadow
+        const gradient = ctx.createRadialGradient(
+          x + offsetX, y + offsetY, 0,
+          x + offsetX, y + offsetY, ballRadius * shadowScale + shadowBlur
+        );
+        gradient.addColorStop(0, `rgba(0,0,0,${shadowOpacity})`);
+        gradient.addColorStop(0.5, `rgba(0,0,0,${shadowOpacity * 0.5})`);
+        gradient.addColorStop(1, 'rgba(0,0,0,0)');
+        
+        ctx.fillStyle = gradient;
+        ctx.fillRect(
+          x + offsetX - ballRadius * shadowScale - shadowBlur,
+          y + offsetY - ballRadius * shadowScale - shadowBlur,
+          (ballRadius * shadowScale + shadowBlur) * 2,
+          (ballRadius * shadowScale + shadowBlur) * 2
+        );
+        
+        // Draw ball
+        const ballSize = ballRadius + z * 15; // Ball grows with height
+        ctx.beginPath();
+        ctx.arc(x, y - z * 50, ballSize, 0, Math.PI * 2);
+        ctx.fillStyle = '#3b82f6';
+        ctx.fill();
+        ctx.strokeStyle = '#2563eb';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        // Update time
+        t += 0.02;
+        
+        requestAnimationFrame(animate);
+      }
+      
+      animate();
+    }
+    
+    // Initialize all demos
+    drawShadowDemo('demo1', {
+      softness: 0.5,
+      opacityAtGround: 0.3,
+      minScale: 0.1,
+      light: { x: 0.5, y: 0.5, z: 2.0 }
+    });
+    
+    drawShadowDemo('demo2', {
+      softness: 0.2,
+      opacityAtGround: 0.5,
+      minScale: 0.1,
+      light: { x: 0.5, y: 0.5, z: 2.0 }
+    });
+    
+    drawShadowDemo('demo3', {
+      softness: 0.9,
+      opacityAtGround: 0.3,
+      minScale: 0.25,
+      light: { x: 0.5, y: 0.5, z: 2.0 }
+    });
+    
+    drawShadowDemo('demo4', {
+      softness: 0.4,
+      opacityAtGround: 0.7,
+      minScale: 0.1,
+      light: { x: 0.5, y: 0.5, z: 1.5 }
+    });
+    
+    drawShadowDemo('demo5', {
+      softness: 0.7,
+      opacityAtGround: 0.15,
+      minScale: 0.3,
+      light: { x: 0.5, y: 0.5, z: 3.0 }
+    });
+    
+    drawShadowDemo('demo6', {
+      softness: 0.5,
+      opacityAtGround: 0.4,
+      minScale: 0.15,
+      light: { x: 0.2, y: 0.5, z: 2.0 }
+    });
+    
+    drawShadowDemo('demo7', {
+      softness: 0.6,
+      opacityAtGround: 0.35,
+      minScale: 0.2,
+      light: { x: 0.5, y: 0.5, z: 4.0 }
+    });
+    
+    drawShadowDemo('demo8', {
+      softness: 0.5,
+      opacityAtGround: 0.4,
+      minScale: 0.5,
+      light: { x: 0.5, y: 0.5, z: 2.0 }
+    });
+  </script>
+</body>
+</html>
