@@ -825,3 +825,540 @@ animation.play();
 - Explore [keypoint interpolation](#) (coming soon)
 - See the [API Reference](./api-reference.md) for complete configuration options
 - Check out [Advanced Topics](./advanced-topics.md) for lighting and shadow techniques
+
+
+---
+
+## Interactive Zones
+
+Interactive zones allow you to define regions on the canvas that trigger callbacks when the ball interacts with them. This enables rich user experiences like tooltips, modals, navigation, and dynamic content.
+
+### Zone Types
+
+The library supports two zone shapes:
+
+**Circle Zones**
+- Defined by center point (x, y) and radius
+- Best for: Circular targets, radial interactions
+- Bounds: `{ x, y, radius }`
+
+**Rectangular Zones**
+- Defined by top-left corner (x, y), width, and height
+- Best for: Buttons, panels, screen regions
+- Bounds: `{ x, y, width, height }`
+
+All coordinates are in normalized world space [0,1] where (0,0) is top-left and (1,1) is bottom-right.
+
+### Zone Events
+
+Each zone can respond to five types of events:
+
+| Event | Trigger | Use Case |
+|-------|---------|----------|
+| `onEnter` | Ball enters zone | Show tooltip, highlight element |
+| `onExit` | Ball exits zone | Hide tooltip, reset state |
+| `onClick` | Zone is clicked | Open modal, navigate, trigger action |
+| `onPeak` | Ball reaches local max Z in zone | Emphasize moment, play sound |
+| `onValley` | Ball reaches local min Z in zone | Trigger effect, change state |
+
+### Basic Zone Examples
+
+#### Example 1: Simple Circular Zone
+
+```typescript
+import { createBallAnimation } from '@ballfx/core';
+
+const animation = createBallAnimation({
+  mount: document.getElementById('container'),
+  driver: 'scroll',
+  scrollTarget: document.scrollingElement,
+  curvePreset: 'sine',
+  light: { x: 0.5, y: 0.5, z: 2.0 },
+  zones: [
+    {
+      id: 'cta-zone',
+      shape: 'circle',
+      bounds: { x: 0.5, y: 0.3, radius: 0.15 },
+      onEnter: (zone) => {
+        console.log('Ball entered:', zone.id);
+        document.getElementById('tooltip').style.display = 'block';
+      },
+      onExit: (zone) => {
+        console.log('Ball exited:', zone.id);
+        document.getElementById('tooltip').style.display = 'none';
+      }
+    }
+  ]
+});
+
+animation.play();
+```
+
+**Result**: A tooltip appears when the ball enters the circular zone and disappears when it exits.
+
+---
+
+#### Example 2: Rectangular Zone with Click Handler
+
+```typescript
+const animation = createBallAnimation({
+  mount: document.getElementById('container'),
+  driver: 'time',
+  durationMs: 4000,
+  loop: true,
+  curvePreset: 'cosine',
+  light: { x: 0.5, y: 0.5, z: 2.0 },
+  zones: [
+    {
+      id: 'button-zone',
+      shape: 'rect',
+      bounds: { x: 0.3, y: 0.4, width: 0.4, height: 0.2 },
+      onClick: (event, zone) => {
+        console.log('Zone clicked!', zone.id);
+        alert('You clicked the interactive zone!');
+      }
+    }
+  ]
+});
+
+animation.play();
+```
+
+**Result**: Clicking the rectangular zone triggers an alert.
+
+---
+
+#### Example 3: Multiple Zones
+
+```typescript
+const animation = createBallAnimation({
+  mount: document.getElementById('container'),
+  driver: 'scroll',
+  scrollTarget: document.scrollingElement,
+  curvePreset: 'sine',
+  light: { x: 0.5, y: 0.5, z: 2.0 },
+  zones: [
+    {
+      id: 'zone-1',
+      shape: 'circle',
+      bounds: { x: 0.3, y: 0.25, radius: 0.12 },
+      onEnter: () => {
+        document.getElementById('section-1').classList.add('highlight');
+      },
+      onExit: () => {
+        document.getElementById('section-1').classList.remove('highlight');
+      }
+    },
+    {
+      id: 'zone-2',
+      shape: 'circle',
+      bounds: { x: 0.7, y: 0.5, radius: 0.12 },
+      onEnter: () => {
+        document.getElementById('section-2').classList.add('highlight');
+      },
+      onExit: () => {
+        document.getElementById('section-2').classList.remove('highlight');
+      }
+    },
+    {
+      id: 'zone-3',
+      shape: 'circle',
+      bounds: { x: 0.5, y: 0.75, radius: 0.12 },
+      onEnter: () => {
+        document.getElementById('section-3').classList.add('highlight');
+      },
+      onExit: () => {
+        document.getElementById('section-3').classList.remove('highlight');
+      }
+    }
+  ]
+});
+
+animation.play();
+```
+
+**Result**: As the ball moves through the animation, different sections of the page are highlighted.
+
+---
+
+### Peak and Valley Detection
+
+Peak and valley events detect local extrema in the ball's Z height while inside a zone. This is useful for emphasizing moments when the ball reaches its highest or lowest point.
+
+#### Example 4: Peak Detection
+
+```typescript
+const animation = createBallAnimation({
+  mount: document.getElementById('container'),
+  driver: 'time',
+  durationMs: 3000,
+  loop: true,
+  curvePreset: 'sine',
+  light: { x: 0.5, y: 0.5, z: 2.0 },
+  zones: [
+    {
+      id: 'peak-zone',
+      shape: 'circle',
+      bounds: { x: 0.5, y: 0.5, radius: 0.25 },
+      onPeak: (z, zone) => {
+        console.log(`Peak detected at height ${z.toFixed(2)}`);
+        // Flash effect
+        document.getElementById('container').classList.add('flash');
+        setTimeout(() => {
+          document.getElementById('container').classList.remove('flash');
+        }, 200);
+      }
+    }
+  ]
+});
+
+animation.play();
+```
+
+**Result**: A flash effect triggers each time the ball reaches its peak height within the zone.
+
+---
+
+#### Example 5: Valley Detection
+
+```typescript
+const animation = createBallAnimation({
+  mount: document.getElementById('container'),
+  driver: 'scroll',
+  scrollTarget: document.scrollingElement,
+  curvePreset: 'cosine',
+  light: { x: 0.5, y: 0.5, z: 2.0 },
+  zones: [
+    {
+      id: 'valley-zone',
+      shape: 'rect',
+      bounds: { x: 0.2, y: 0.4, width: 0.6, height: 0.2 },
+      onValley: (z, zone) => {
+        console.log(`Valley detected at height ${z.toFixed(2)}`);
+        // Play sound effect
+        const audio = new Audio('/sounds/bounce.mp3');
+        audio.play();
+      }
+    }
+  ]
+});
+
+animation.play();
+```
+
+**Result**: A sound effect plays when the ball reaches its lowest point in the zone.
+
+---
+
+### Advanced Zone Patterns
+
+#### Pattern 1: Modal Trigger Zone
+
+```typescript
+const animation = createBallAnimation({
+  mount: document.getElementById('container'),
+  driver: 'scroll',
+  scrollTarget: document.scrollingElement,
+  curvePreset: 'sine',
+  light: { x: 0.5, y: 0.5, z: 2.0 },
+  zones: [
+    {
+      id: 'modal-trigger',
+      shape: 'circle',
+      bounds: { x: 0.5, y: 0.6, radius: 0.18 },
+      onEnter: (zone) => {
+        // Show modal when ball enters
+        const modal = document.getElementById('info-modal');
+        modal.style.display = 'block';
+        modal.classList.add('fade-in');
+      },
+      onExit: (zone) => {
+        // Hide modal when ball exits
+        const modal = document.getElementById('info-modal');
+        modal.classList.remove('fade-in');
+        modal.classList.add('fade-out');
+        setTimeout(() => {
+          modal.style.display = 'none';
+          modal.classList.remove('fade-out');
+        }, 300);
+      },
+      onClick: (event, zone) => {
+        // Close modal on click
+        document.getElementById('info-modal').style.display = 'none';
+      }
+    }
+  ]
+});
+
+animation.play();
+```
+
+---
+
+#### Pattern 2: Navigation Zones
+
+```typescript
+const sections = ['intro', 'features', 'pricing', 'contact'];
+
+const zones = sections.map((section, index) => ({
+  id: `nav-${section}`,
+  shape: 'rect' as const,
+  bounds: {
+    x: 0.1,
+    y: index * 0.25,
+    width: 0.8,
+    height: 0.2
+  },
+  onEnter: () => {
+    // Update navigation
+    document.querySelectorAll('.nav-item').forEach(item => {
+      item.classList.remove('active');
+    });
+    document.getElementById(`nav-${section}`).classList.add('active');
+    
+    // Update URL hash
+    window.history.replaceState(null, '', `#${section}`);
+  }
+}));
+
+const animation = createBallAnimation({
+  mount: document.getElementById('container'),
+  driver: 'scroll',
+  scrollTarget: document.scrollingElement,
+  curvePreset: 'easeInOut',
+  light: { x: 0.5, y: 0.5, z: 2.0 },
+  zones: zones
+});
+
+animation.play();
+```
+
+**Result**: Navigation updates automatically as the ball moves through different sections.
+
+---
+
+#### Pattern 3: Progress Indicator with Peaks
+
+```typescript
+let progressCount = 0;
+
+const animation = createBallAnimation({
+  mount: document.getElementById('container'),
+  driver: 'time',
+  durationMs: 5000,
+  loop: true,
+  curvePreset: 'sine',
+  light: { x: 0.5, y: 0.5, z: 2.0 },
+  zones: [
+    {
+      id: 'progress-zone',
+      shape: 'rect',
+      bounds: { x: 0, y: 0, width: 1, height: 1 }, // Full canvas
+      onPeak: (z, zone) => {
+        progressCount++;
+        document.getElementById('progress-counter').textContent = 
+          `Peaks: ${progressCount}`;
+      },
+      onValley: (z, zone) => {
+        document.getElementById('status').textContent = 'At ground level';
+        document.getElementById('status').style.color = '#ef4444';
+      }
+    }
+  ]
+});
+
+animation.play();
+```
+
+**Result**: A counter tracks how many times the ball reaches its peak, and status updates at valleys.
+
+---
+
+#### Pattern 4: Tooltip with Position Tracking
+
+```typescript
+const animation = createBallAnimation({
+  mount: document.getElementById('container'),
+  driver: 'scroll',
+  scrollTarget: document.scrollingElement,
+  curvePreset: 'cosine',
+  light: { x: 0.5, y: 0.5, z: 2.0 },
+  zones: [
+    {
+      id: 'tooltip-zone',
+      shape: 'circle',
+      bounds: { x: 0.5, y: 0.4, radius: 0.2 },
+      onEnter: (zone) => {
+        const tooltip = document.getElementById('tooltip');
+        tooltip.style.display = 'block';
+        
+        // Position tooltip near zone center
+        const container = document.getElementById('container');
+        const rect = container.getBoundingClientRect();
+        tooltip.style.left = `${rect.left + zone.bounds.x * rect.width}px`;
+        tooltip.style.top = `${rect.top + zone.bounds.y * rect.height - 50}px`;
+        
+        tooltip.textContent = 'Interactive Zone';
+      },
+      onExit: (zone) => {
+        document.getElementById('tooltip').style.display = 'none';
+      },
+      onClick: (event, zone) => {
+        window.location.href = '/learn-more';
+      }
+    }
+  ]
+});
+
+animation.play();
+```
+
+**Result**: A positioned tooltip appears near the zone and clicking navigates to another page.
+
+---
+
+### Zone Debugging
+
+Enable debug mode to visualize zones on the canvas:
+
+```typescript
+const animation = createBallAnimation({
+  mount: document.getElementById('container'),
+  driver: 'scroll',
+  scrollTarget: document.scrollingElement,
+  curvePreset: 'sine',
+  light: { x: 0.5, y: 0.5, z: 2.0 },
+  debug: true, // Enable debug visualization
+  zones: [
+    {
+      id: 'debug-zone-1',
+      shape: 'circle',
+      bounds: { x: 0.3, y: 0.3, radius: 0.15 },
+      onEnter: () => console.log('Entered zone 1')
+    },
+    {
+      id: 'debug-zone-2',
+      shape: 'rect',
+      bounds: { x: 0.5, y: 0.5, width: 0.3, height: 0.2 },
+      onEnter: () => console.log('Entered zone 2')
+    }
+  ]
+});
+
+animation.play();
+```
+
+**Result**: Zone boundaries are drawn on the canvas, making it easy to see where zones are positioned.
+
+---
+
+### Best Practices
+
+**Zone Sizing:**
+- **Small zones (radius < 0.1)**: Precise interactions, require careful positioning
+- **Medium zones (radius 0.1-0.2)**: Good balance, most common use case
+- **Large zones (radius > 0.2)**: Broad interactions, section-level triggers
+
+**Event Handling:**
+- Always wrap callback code in try-catch for production
+- Keep callbacks fast (< 16ms) to avoid frame drops
+- Use debouncing for expensive operations
+- Clean up resources (event listeners, timers) in onExit
+
+**Performance:**
+- Limit to 5-10 zones per animation for best performance
+- Use rectangular zones when possible (slightly faster hit testing)
+- Avoid complex DOM manipulations in callbacks
+- Consider using CSS transitions instead of JavaScript animations
+
+**User Experience:**
+- Provide visual feedback for interactive zones (cursor change, hover effects)
+- Make clickable zones obvious (use debug mode during development)
+- Don't rely solely on zones for critical interactions (provide alternative UI)
+- Test on mobile devices (touch targets should be larger)
+
+**Accessibility:**
+- Zones are decorative enhancements, not primary navigation
+- Provide keyboard alternatives for zone interactions
+- Use ARIA labels for screen readers
+- Consider users with reduced motion preferences
+
+---
+
+### Error Handling
+
+The library handles callback errors gracefully:
+
+```typescript
+const animation = createBallAnimation({
+  mount: document.getElementById('container'),
+  driver: 'time',
+  durationMs: 3000,
+  loop: true,
+  curvePreset: 'sine',
+  light: { x: 0.5, y: 0.5, z: 2.0 },
+  zones: [
+    {
+      id: 'error-zone',
+      shape: 'circle',
+      bounds: { x: 0.5, y: 0.5, radius: 0.2 },
+      onEnter: (zone) => {
+        // This error won't crash the animation
+        throw new Error('Oops!');
+      }
+    }
+  ]
+});
+
+animation.play();
+```
+
+**Result**: Errors are caught and logged to the console, but the animation continues running.
+
+---
+
+### Common Patterns
+
+**Show/Hide Content:**
+```typescript
+onEnter: () => element.style.display = 'block',
+onExit: () => element.style.display = 'none'
+```
+
+**Toggle Classes:**
+```typescript
+onEnter: () => element.classList.add('active'),
+onExit: () => element.classList.remove('active')
+```
+
+**Update Text:**
+```typescript
+onEnter: (zone) => {
+  document.getElementById('status').textContent = `In ${zone.id}`;
+}
+```
+
+**Play Audio:**
+```typescript
+onPeak: () => {
+  const audio = new Audio('/sounds/peak.mp3');
+  audio.play();
+}
+```
+
+**Track Analytics:**
+```typescript
+onEnter: (zone) => {
+  analytics.track('zone_entered', { zoneId: zone.id });
+}
+```
+
+---
+
+### Next Steps
+
+- See the [API Reference](./api-reference.md) for complete zone configuration options
+- Learn about [debug mode](./advanced-topics.md#debug-mode) for zone visualization
+- Explore [accessibility features](./advanced-topics.md#accessibility) for inclusive design
+- Check out the [examples repository](#) for more zone patterns
+

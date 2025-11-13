@@ -113,7 +113,6 @@ export function bezier(t: number): number {
   const u3 = u2 * u;
   const oneMinusU = 1 - u;
   const oneMinusU2 = oneMinusU * oneMinusU;
-  const oneMinusU3 = oneMinusU2 * oneMinusU;
   
   // Cubic Bezier y(u) = (1-u)³*0 + 3(1-u)²u*p1y + 3(1-u)u²*p2y + u³*1
   const y = 3 * oneMinusU2 * u * p1y + 3 * oneMinusU * u2 * p2y + u3;
@@ -284,6 +283,9 @@ export function createKeypointCurve(keypoints: Keypoint[]): CurveFn {
   if (sorted.length === 1) {
     // Single keypoint: return constant value based on progress
     const kp = sorted[0];
+    if (!kp) {
+      return (_t: number) => 0;
+    }
     return (t: number) => kp.zMin + t * (kp.zMax - kp.zMin);
   }
   
@@ -294,6 +296,8 @@ export function createKeypointCurve(keypoints: Keypoint[]): CurveFn {
     const prev = i > 0 ? sorted[i - 1] : null;
     const curr = sorted[i];
     const next = i < sorted.length - 1 ? sorted[i + 1] : null;
+    
+    if (!curr) continue;
     
     // Compute Z value at current keypoint based on progress
     // For tangent computation, we use the midpoint of the range
@@ -320,22 +324,28 @@ export function createKeypointCurve(keypoints: Keypoint[]): CurveFn {
     const y = t;
     
     // Find the segment containing y
-    if (y <= sorted[0].y) {
+    const firstKp = sorted[0];
+    if (!firstKp || y <= firstKp.y) {
       // Before first keypoint
       const kp = sorted[0];
+      if (!kp) return 0;
       return kp.zMin + t * (kp.zMax - kp.zMin);
     }
     
-    if (y >= sorted[sorted.length - 1].y) {
+    const lastKp = sorted[sorted.length - 1];
+    if (!lastKp || y >= lastKp.y) {
       // After last keypoint
       const kp = sorted[sorted.length - 1];
+      if (!kp) return 0;
       return kp.zMin + t * (kp.zMax - kp.zMin);
     }
     
     // Find segment
     let segmentIndex = 0;
     for (let i = 0; i < sorted.length - 1; i++) {
-      if (y >= sorted[i].y && y <= sorted[i + 1].y) {
+      const curr = sorted[i];
+      const next = sorted[i + 1];
+      if (curr && next && y >= curr.y && y <= next.y) {
         segmentIndex = i;
         break;
       }
@@ -343,6 +353,7 @@ export function createKeypointCurve(keypoints: Keypoint[]): CurveFn {
     
     const kp0 = sorted[segmentIndex];
     const kp1 = sorted[segmentIndex + 1];
+    if (!kp0 || !kp1) return 0;
     
     // Compute Z values at keypoints based on progress
     const z0 = kp0.zMin + t * (kp0.zMax - kp0.zMin);
@@ -352,8 +363,12 @@ export function createKeypointCurve(keypoints: Keypoint[]): CurveFn {
     const localT = (y - kp0.y) / (kp1.y - kp0.y);
     
     // Interpolate using cubic Hermite
-    const m0 = tangents[segmentIndex] * (kp1.y - kp0.y);
-    const m1 = tangents[segmentIndex + 1] * (kp1.y - kp0.y);
+    const tan0 = tangents[segmentIndex];
+    const tan1 = tangents[segmentIndex + 1];
+    if (tan0 === undefined || tan1 === undefined) return z0;
+    
+    const m0 = tan0 * (kp1.y - kp0.y);
+    const m1 = tan1 * (kp1.y - kp0.y);
     
     const z = cubicHermite(z0, z1, m0, m1, localT);
     

@@ -15,6 +15,7 @@ import type {
   BallStyle,
   InteractiveZone,
   LightSource,
+  InteractionManager,
 } from '../types';
 
 /**
@@ -50,6 +51,9 @@ export interface RendererConfig {
   
   /** Enable debug mode */
   debug?: boolean;
+  
+  /** Interaction manager for zone updates (optional) */
+  interactionManager?: InteractionManager;
 }
 
 /**
@@ -203,7 +207,7 @@ export class Renderer {
    * Implements: get progress → compute curve → calculate position
    */
   private update(): void {
-    const { driver, curveFn, pathX, pathY, shadowCalculator, light, ballStyle } = this.config;
+    const { driver, curveFn, pathX, pathY, shadowCalculator, light, ballStyle, interactionManager } = this.config;
     
     // Get current progress from driver
     const t = driver.getProgress();
@@ -233,6 +237,11 @@ export class Renderer {
       radius,
       shadow,
     };
+    
+    // Update interaction manager with current ball position
+    if (interactionManager) {
+      interactionManager.update({ x, y }, z);
+    }
   }
   
   /**

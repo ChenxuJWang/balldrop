@@ -81,7 +81,8 @@ export function createCanvasManager(options: CanvasOptions): CanvasManager {
     canvas.style.height = `${height}px`;
     
     // Scale context to match DPR
-    context.setTransform(dpr, 0, 0, dpr, 0, 0);
+    // Context is guaranteed to be non-null due to check at initialization
+    context!.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
   
   /**

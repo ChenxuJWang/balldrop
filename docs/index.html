@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ball Animation Library - Demos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            color: white;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 1.2rem;
+            margin-bottom: 3rem;
+            opacity: 0.9;
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .demo-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: white;
+            display: block;
+        }
+
+        .demo-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .demo-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .demo-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .demo-description {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            line-height: 1.5;
+        }
+
+        .docs-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 2rem;
+        }
+
+        .docs-section h2 {
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .docs-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .doc-link {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            color: white;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .doc-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🎾 Ball Animation Library</h1>
+        <p class="subtitle">Interactive Demos & Documentation</p>
+
+        <div class="demo-grid">
+            <a href="./render-demo.html" class="demo-card">
+                <div class="demo-icon">🎨</div>
+                <div class="demo-title">Render Demo</div>
+                <div class="demo-description">
+                    Explore the render loop, shadow rendering, and interactive zones with manual controls
+                </div>
+            </a>
+
+            <a href="./shadow-demo.html" class="demo-card">
+                <div class="demo-icon">🌟</div>
+                <div class="demo-title">Shadow Configurations</div>
+                <div class="demo-description">
+                    Compare different shadow settings and lighting configurations side-by-side
+                </div>
+            </a>
+
+            <a href="./zones-demo.html" class="demo-card">
+                <div class="demo-icon">🎯</div>
+                <div class="demo-title">Interactive Zones</div>
+                <div class="demo-description">
+                    See how zones trigger callbacks for enter, exit, click, peak, and valley events
+                </div>
+            </a>
+        </div>
+
+        <div class="docs-section">
+            <h2>📚 Documentation</h2>
+            <div class="docs-links">
+                <a href="./getting-started.md" class="doc-link">Getting Started</a>
+                <a href="./configuration-guide.md" class="doc-link">Configuration Guide</a>
+                <a href="./api-reference.md" class="doc-link">API Reference</a>
+                <a href="./advanced-topics.md" class="doc-link">Advanced Topics</a>
+                <a href="./architecture-decisions.md" class="doc-link">Architecture</a>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -489,6 +489,90 @@ interface InteractiveZone {
 }
 ```
 
+**Zone Shapes:**
+
+**Circle:**
+- Defined by center point (x, y) and radius
+- All coordinates in normalized world space [0,1]
+- Example: `{ x: 0.5, y: 0.3, radius: 0.15 }`
+
+**Rectangle:**
+- Defined by top-left corner (x, y), width, and height
+- All coordinates in normalized world space [0,1]
+- Example: `{ x: 0.3, y: 0.4, width: 0.4, height: 0.2 }`
+
+**Zone Callbacks:**
+
+**onEnter(zone: InteractiveZone)**
+- Called once when the ball enters the zone
+- Receives the zone object as parameter
+- Use for: showing tooltips, highlighting elements, triggering animations
+- Example:
+```typescript
+onEnter: (zone) => {
+  console.log(`Entered ${zone.id}`);
+  document.getElementById('tooltip').style.display = 'block';
+}
+```
+
+**onExit(zone: InteractiveZone)**
+- Called once when the ball exits the zone
+- Receives the zone object as parameter
+- Use for: hiding tooltips, resetting state, cleanup
+- Example:
+```typescript
+onExit: (zone) => {
+  console.log(`Exited ${zone.id}`);
+  document.getElementById('tooltip').style.display = 'none';
+}
+```
+
+**onClick(event: MouseEvent, zone: InteractiveZone)**
+- Called when the zone is clicked
+- Receives the mouse event and zone object as parameters
+- Use for: navigation, opening modals, triggering actions
+- Example:
+```typescript
+onClick: (event, zone) => {
+  console.log(`Clicked ${zone.id} at`, event.clientX, event.clientY);
+  window.location.href = '/learn-more';
+}
+```
+
+**onPeak(z: number, zone: InteractiveZone)**
+- Called when the ball reaches a local maximum Z height within the zone
+- Receives the Z height at the peak and zone object as parameters
+- Requires at least 3 consecutive frames to detect peak
+- Use for: emphasizing moments, playing sounds, triggering effects
+- Example:
+```typescript
+onPeak: (z, zone) => {
+  console.log(`Peak at height ${z.toFixed(2)} in ${zone.id}`);
+  document.getElementById('container').classList.add('flash');
+}
+```
+
+**onValley(z: number, zone: InteractiveZone)**
+- Called when the ball reaches a local minimum Z height within the zone
+- Receives the Z height at the valley and zone object as parameters
+- Requires at least 3 consecutive frames to detect valley
+- Use for: bounce effects, sound effects, state changes
+- Example:
+```typescript
+onValley: (z, zone) => {
+  console.log(`Valley at height ${z.toFixed(2)} in ${zone.id}`);
+  const audio = new Audio('/sounds/bounce.mp3');
+  audio.play();
+}
+```
+
+**Callback Error Handling:**
+
+All zone callbacks are wrapped in try-catch blocks. If a callback throws an error:
+- The error is logged to the console
+- The animation continues running
+- Other zones are not affected
+
 **Example:**
 ```typescript
 const config: AnimationConfig = {
@@ -500,14 +584,49 @@ const config: AnimationConfig = {
       id: 'cta-zone',
       shape: 'circle',
       bounds: { x: 0.5, y: 0.3, radius: 0.15 },
-      onEnter: () => console.log('Ball entered zone'),
-      onExit: () => console.log('Ball left zone'),
-      onClick: (event) => console.log('Zone clicked', event)
+      onEnter: (zone) => {
+        console.log('Ball entered zone');
+        document.getElementById('tooltip').style.display = 'block';
+      },
+      onExit: (zone) => {
+        console.log('Ball left zone');
+        document.getElementById('tooltip').style.display = 'none';
+      },
+      onClick: (event, zone) => {
+        console.log('Zone clicked', event);
+        window.location.href = '/learn-more';
+      },
+      onPeak: (z, zone) => {
+        console.log(`Peak at ${z.toFixed(2)}`);
+        document.getElementById('container').classList.add('flash');
+      },
+      onValley: (z, zone) => {
+        console.log(`Valley at ${z.toFixed(2)}`);
+        const audio = new Audio('/sounds/bounce.mp3');
+        audio.play();
+      }
     }
   ],
   light: { x: 0.5, y: 0.5, z: 2.0 }
 };
 ```
+
+**Best Practices:**
+
+1. **Keep callbacks fast**: Callbacks run on every frame. Keep them under 16ms to maintain 60fps.
+2. **Use debouncing**: For expensive operations, debounce or throttle your callbacks.
+3. **Clean up resources**: Remove event listeners and clear timers in onExit callbacks.
+4. **Handle errors**: Wrap risky operations in try-catch blocks.
+5. **Test on mobile**: Touch targets should be larger than mouse targets (radius > 0.15).
+
+**Performance Considerations:**
+
+- Hit testing is performed every frame for all zones
+- Limit to 5-10 zones per animation for best performance
+- Rectangular zones are slightly faster than circular zones
+- Peak/valley detection requires tracking Z history (minimal overhead)
+
+See the [Configuration Guide](./configuration-guide.md#interactive-zones) for more examples and patterns.
 
 ---
 

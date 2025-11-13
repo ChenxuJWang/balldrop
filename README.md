@@ -73,12 +73,139 @@ Get started with a simple bouncing ball animation in just a few lines:
 
 That's it! You now have a ball bouncing with realistic shadows.
 
+## More Examples
+
+### Scroll-Based Animation
+
+Create an animation that follows the page scroll:
+
+```typescript
+import { createBallAnimation } from '@ballfx/core';
+
+const animation = createBallAnimation({
+  mount: document.getElementById('ball-container'),
+  driver: 'scroll',
+  scrollTarget: document.scrollingElement,
+  curvePreset: 'easeInOut',
+  light: { x: 0.75, y: 0.25, z: 2.5 },
+  ballStyle: {
+    fill: '#ef4444',
+    radiusAtGround: 25,
+    radiusAtMax: 50
+  }
+});
+
+animation.play();
+```
+
+### Interactive Zones
+
+Add interactive zones with callbacks:
+
+```typescript
+const animation = createBallAnimation({
+  mount: document.getElementById('ball-container'),
+  driver: 'time',
+  durationMs: 4000,
+  loop: true,
+  curvePreset: 'sine',
+  light: { x: 0.5, y: 0.5, z: 2.0 },
+  zones: [
+    {
+      id: 'cta-zone',
+      shape: 'circle',
+      bounds: { x: 0.5, y: 0.3, radius: 0.15 },
+      onEnter: () => {
+        console.log('Ball entered zone!');
+        document.getElementById('tooltip').style.display = 'block';
+      },
+      onExit: () => {
+        console.log('Ball left zone!');
+        document.getElementById('tooltip').style.display = 'none';
+      },
+      onClick: () => {
+        window.location.href = '/learn-more';
+      }
+    }
+  ]
+});
+
+animation.play();
+```
+
+### Custom Curves
+
+Define custom height curves:
+
+```typescript
+const animation = createBallAnimation({
+  mount: document.getElementById('ball-container'),
+  driver: 'time',
+  durationMs: 3000,
+  loop: true,
+  customCurve: (t) => {
+    // Quadratic ease-in-out
+    return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+  },
+  light: { x: 0.5, y: 0.5, z: 2.0 }
+});
+
+animation.play();
+```
+
+### Playback Control
+
+Control animation playback programmatically:
+
+```typescript
+const animation = createBallAnimation({
+  mount: document.getElementById('ball-container'),
+  driver: 'time',
+  durationMs: 3000,
+  curvePreset: 'sine',
+  light: { x: 0.5, y: 0.5, z: 2.0 }
+});
+
+// Play/pause/stop controls
+document.getElementById('play-btn').addEventListener('click', () => {
+  animation.play();
+});
+
+document.getElementById('pause-btn').addEventListener('click', () => {
+  animation.pause();
+});
+
+document.getElementById('stop-btn').addEventListener('click', () => {
+  animation.stop();
+});
+
+// Manual progress control
+document.getElementById('progress-slider').addEventListener('input', (e) => {
+  const progress = parseFloat(e.target.value) / 100;
+  animation.setProgress(progress);
+});
+
+// Runtime configuration updates
+document.getElementById('theme-toggle').addEventListener('click', () => {
+  animation.updateConfig({
+    ballStyle: { fill: '#10b981' },
+    light: { x: 0.7, y: 0.3, z: 2.5 }
+  });
+});
+
+// Cleanup
+window.addEventListener('beforeunload', () => {
+  animation.destroy();
+});
+```
+
 ## Documentation
 
-Full documentation coming soon. For now, see:
-- [Requirements](.kiro/specs/ball-animation-library/requirements.md)
-- [Design Document](.kiro/specs/ball-animation-library/design.md)
-- [Architecture Decisions](docs/architecture-decisions.md)
+- [Getting Started](docs/getting-started.md) - Setup and basic usage
+- [Configuration Guide](docs/configuration-guide.md) - All configuration options
+- [API Reference](docs/api-reference.md) - Complete API documentation
+- [Advanced Topics](docs/advanced-topics.md) - Lighting, shadows, and performance
+- [Architecture Decisions](docs/architecture-decisions.md) - Design decisions and rationale
 
 ## Packages
 

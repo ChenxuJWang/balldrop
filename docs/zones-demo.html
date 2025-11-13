@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive Zones Demo - Ball Animation Library</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+      color: white;
+    }
+
+    h1 {
+      margin-bottom: 1rem;
+      font-size: 2rem;
+      text-align: center;
+    }
+
+    .description {
+      max-width: 600px;
+      text-align: center;
+      margin-bottom: 2rem;
+      opacity: 0.9;
+    }
+
+    .container {
+      position: relative;
+      width: 100%;
+      max-width: 800px;
+      height: 600px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+    }
+
+    #canvas-container {
+      width: 100%;
+      height: 100%;
+    }
+
+    .info-panel {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 1rem;
+      border-radius: 10px;
+      min-width: 200px;
+      backdrop-filter: blur(10px);
+    }
+
+    .info-panel h3 {
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+      color: #a78bfa;
+    }
+
+    .info-panel p {
+      font-size: 0.85rem;
+      margin: 0.25rem 0;
+      opacity: 0.8;
+    }
+
+    .info-panel .status {
+      font-weight: bold;
+      color: #10b981;
+    }
+
+    .info-panel .status.inactive {
+      color: #ef4444;
+    }
+
+    .controls {
+      margin-top: 2rem;
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    button {
+      padding: 0.75rem 1.5rem;
+      background: rgba(255, 255, 255, 0.2);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 10px;
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    button:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(5px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.show {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      color: #333;
+      padding: 2rem;
+      border-radius: 20px;
+      max-width: 500px;
+      text-align: center;
+      animation: modalSlideIn 0.3s ease;
+    }
+
+    @keyframes modalSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .modal-content h2 {
+      color: #667eea;
+      margin-bottom: 1rem;
+    }
+
+    .modal-content p {
+      margin-bottom: 1.5rem;
+      line-height: 1.6;
+    }
+
+    .modal-content button {
+      background: #667eea;
+      border: none;
+      color: white;
+    }
+
+    .modal-content button:hover {
+      background: #5568d3;
+    }
+
+    .flash {
+      animation: flashEffect 0.2s ease;
+    }
+
+    @keyframes flashEffect {
+      0%, 100% { filter: brightness(1); }
+      50% { filter: brightness(1.5); }
+    }
+
+    .event-log {
+      margin-top: 2rem;
+      max-width: 800px;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 1rem;
+      border-radius: 10px;
+      backdrop-filter: blur(10px);
+    }
+
+    .event-log h3 {
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+      color: #a78bfa;
+    }
+
+    .event-log ul {
+      list-style: none;
+      max-height: 150px;
+      overflow-y: auto;
+      font-size: 0.85rem;
+      font-family: 'Courier New', monospace;
+    }
+
+    .event-log li {
+      padding: 0.25rem 0;
+      opacity: 0.8;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .event-log li:last-child {
+      border-bottom: none;
+    }
+
+    .event-enter { color: #10b981; }
+    .event-exit { color: #ef4444; }
+    .event-click { color: #3b82f6; }
+    .event-peak { color: #f59e0b; }
+    .event-valley { color: #8b5cf6; }
+  </style>
+</head>
+<body>
+  <h1>🎯 Interactive Zones Demo</h1>
+  <p class="description">
+    This demo showcases interactive zones with the Ball Animation Library. 
+    Watch the info panel as the ball moves through different zones, and try clicking on the zones!
+  </p>
+
+  <div class="container">
+    <div id="canvas-container"></div>
+    <div class="info-panel">
+      <h3>Zone Status</h3>
+      <p>Zone 1: <span id="zone1-status" class="status inactive">Outside</span></p>
+      <p>Zone 2: <span id="zone2-status" class="status inactive">Outside</span></p>
+      <p>Zone 3: <span id="zone3-status" class="status inactive">Outside</span></p>
+      <p style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.2);">
+        Peaks: <span id="peak-count">0</span><br>
+        Valleys: <span id="valley-count">0</span>
+      </p>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button id="play-btn">▶️ Play</button>
+    <button id="pause-btn">⏸️ Pause</button>
+    <button id="stop-btn">⏹️ Stop</button>
+    <button id="debug-btn">🐛 Toggle Debug</button>
+  </div>
+
+  <div class="event-log">
+    <h3>Event Log</h3>
+    <ul id="event-list"></ul>
+  </div>
+
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <h2>🎉 Zone Clicked!</h2>
+      <p>You clicked on an interactive zone. This could trigger navigation, open a form, or perform any action you need.</p>
+      <button onclick="closeModal()">Close</button>
+    </div>
+  </div>
+
+  <script type="module">
+    // This is a demo - in production, import from the actual library
+    // import { createBallAnimation } from '@ballfx/core';
+    
+    // For demo purposes, we'll show the expected behavior
+    console.log('Interactive Zones Demo');
+    console.log('This demo shows how zones work with the Ball Animation Library');
+    
+    // Event logging
+    let peakCount = 0;
+    let valleyCount = 0;
+    const eventList = document.getElementById('event-list');
+    
+    function logEvent(type, message) {
+      const li = document.createElement('li');
+      li.className = `event-${type}`;
+      li.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      eventList.insertBefore(li, eventList.firstChild);
+      
+      // Keep only last 20 events
+      while (eventList.children.length > 20) {
+        eventList.removeChild(eventList.lastChild);
+      }
+    }
+    
+    function updateZoneStatus(zoneId, isInside) {
+      const statusEl = document.getElementById(`zone${zoneId}-status`);
+      statusEl.textContent = isInside ? 'Inside' : 'Outside';
+      statusEl.className = isInside ? 'status' : 'status inactive';
+    }
+    
+    function showModal() {
+      document.getElementById('modal').classList.add('show');
+    }
+    
+    window.closeModal = function() {
+      document.getElementById('modal').classList.remove('show');
+    }
+    
+    // Simulated animation configuration
+    const config = {
+      mount: document.getElementById('canvas-container'),
+      driver: 'time',
+      durationMs: 5000,
+      loop: true,
+      curvePreset: 'sine',
+      light: { x: 0.5, y: 0.5, z: 2.0 },
+      ballStyle: {
+        fill: '#a78bfa',
+        radiusAtGround: 25,
+        radiusAtMax: 50
+      },
+      zones: [
+        {
+          id: 'zone-1',
+          shape: 'circle',
+          bounds: { x: 0.3, y: 0.25, radius: 0.15 },
+          onEnter: (zone) => {
+            logEvent('enter', `Entered ${zone.id}`);
+            updateZoneStatus(1, true);
+          },
+          onExit: (zone) => {
+            logEvent('exit', `Exited ${zone.id}`);
+            updateZoneStatus(1, false);
+          },
+          onClick: (event, zone) => {
+            logEvent('click', `Clicked ${zone.id}`);
+            showModal();
+          },
+          onPeak: (z, zone) => {
+            peakCount++;
+            document.getElementById('peak-count').textContent = peakCount;
+            logEvent('peak', `Peak at height ${z.toFixed(2)} in ${zone.id}`);
+            document.querySelector('.container').classList.add('flash');
+            setTimeout(() => {
+              document.querySelector('.container').classList.remove('flash');
+            }, 200);
+          }
+        },
+        {
+          id: 'zone-2',
+          shape: 'circle',
+          bounds: { x: 0.7, y: 0.5, radius: 0.15 },
+          onEnter: (zone) => {
+            logEvent('enter', `Entered ${zone.id}`);
+            updateZoneStatus(2, true);
+          },
+          onExit: (zone) => {
+            logEvent('exit', `Exited ${zone.id}`);
+            updateZoneStatus(2, false);
+          },
+          onClick: (event, zone) => {
+            logEvent('click', `Clicked ${zone.id}`);
+            showModal();
+          },
+          onValley: (z, zone) => {
+            valleyCount++;
+            document.getElementById('valley-count').textContent = valleyCount;
+            logEvent('valley', `Valley at height ${z.toFixed(2)} in ${zone.id}`);
+          }
+        },
+        {
+          id: 'zone-3',
+          shape: 'rect',
+          bounds: { x: 0.35, y: 0.65, width: 0.3, height: 0.2 },
+          onEnter: (zone) => {
+            logEvent('enter', `Entered ${zone.id}`);
+            updateZoneStatus(3, true);
+          },
+          onExit: (zone) => {
+            logEvent('exit', `Exited ${zone.id}`);
+            updateZoneStatus(3, false);
+          },
+          onClick: (event, zone) => {
+            logEvent('click', `Clicked ${zone.id}`);
+            showModal();
+          }
+        }
+      ],
+      debug: true
+    };
+    
+    // Log configuration
+    console.log('Animation Configuration:', config);
+    logEvent('enter', 'Demo initialized - waiting for library implementation');
+    
+    // Control buttons
+    document.getElementById('play-btn').addEventListener('click', () => {
+      logEvent('click', 'Play button clicked');
+      // animation.play();
+    });
+    
+    document.getElementById('pause-btn').addEventListener('click', () => {
+      logEvent('click', 'Pause button clicked');
+      // animation.pause();
+    });
+    
+    document.getElementById('stop-btn').addEventListener('click', () => {
+      logEvent('click', 'Stop button clicked');
+      // animation.stop();
+    });
+    
+    let debugEnabled = true;
+    document.getElementById('debug-btn').addEventListener('click', () => {
+      debugEnabled = !debugEnabled;
+      logEvent('click', `Debug mode ${debugEnabled ? 'enabled' : 'disabled'}`);
+      // animation.updateConfig({ debug: debugEnabled });
+    });
+    
+    // Close modal on click outside
+    document.getElementById('modal').addEventListener('click', (e) => {
+      if (e.target.id === 'modal') {
+        closeModal();
+      }
+    });
+  </script>
+</body>
+</html>

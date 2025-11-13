@@ -245,7 +245,8 @@ export class ScrollDriver implements ProgressDriver {
   private isRunning: boolean = false;
   private isPaused: boolean = false;
   private rafId: number | null = null;
-  private lastScrollY: number = 0;
+  // Track last scroll position for future use
+  // private lastScrollY: number = 0;
   private pendingUpdate: boolean = false;
   
   /** Hysteresis threshold to prevent excessive updates (0.1% change) */
@@ -288,7 +289,7 @@ export class ScrollDriver implements ProgressDriver {
     this.isRunning = false;
     this.isPaused = false;
     this.progress = 0;
-    this.lastScrollY = 0;
+    // this.lastScrollY = 0;
     this.pendingUpdate = false;
     
     // Remove scroll listener

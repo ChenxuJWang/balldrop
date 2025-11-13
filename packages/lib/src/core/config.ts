@@ -43,7 +43,7 @@ export const CONFIG_DEFAULTS = {
   zones: [],
   
   // Default path functions
-  pathX: (t: number) => 0.5,  // centered horizontally
+  pathX: (_t: number) => 0.5,  // centered horizontally
   pathY: (t: number) => t,     // top to bottom
 };
 

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,21 +13,21 @@
       background: #1e293b;
       color: #e2e8f0;
     }
-    
+
     .container {
       max-width: 1200px;
       margin: 0 auto;
     }
-    
+
     h1 {
       margin-bottom: 10px;
     }
-    
+
     .description {
       color: #94a3b8;
       margin-bottom: 30px;
     }
-    
+
     .canvas-container {
       background: white;
       border-radius: 8px;
@@ -34,40 +35,40 @@
       margin-bottom: 30px;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
     }
-    
+
     canvas {
       display: block;
       border: 2px solid #cbd5e1;
       border-radius: 4px;
     }
-    
+
     .controls {
       background: #334155;
       padding: 20px;
       border-radius: 8px;
       margin-bottom: 20px;
     }
-    
+
     .control-group {
       margin-bottom: 15px;
     }
-    
+
     label {
       display: block;
       margin-bottom: 5px;
       font-weight: 500;
     }
-    
+
     input[type="range"] {
       width: 100%;
       margin-bottom: 5px;
     }
-    
+
     .value-display {
       color: #94a3b8;
       font-size: 14px;
     }
-    
+
     button {
       background: #3b82f6;
       color: white;
@@ -79,21 +80,21 @@
       margin-right: 10px;
       margin-bottom: 10px;
     }
-    
+
     button:hover {
       background: #2563eb;
     }
-    
+
     button:active {
       background: #1d4ed8;
     }
-    
+
     .checkbox-group {
       display: flex;
       align-items: center;
       gap: 10px;
     }
-    
+
     input[type="checkbox"] {
       width: 20px;
       height: 20px;
@@ -101,84 +102,82 @@
     }
   </style>
 </head>
+
 <body>
   <div class="container">
     <h1>🎾 Ball Render Loop Demo</h1>
     <p class="description">
-      Visual validation of the render loop, shadow rendering, and ball drawing.
-      Use the controls below to test different configurations.
+      Visual validation of the render loop, shadow rendering, ball drawing, and interactive zones.
+      Use the controls below to test different configurations. Enable debug mode to see interactive zones.
     </p>
-    
+
     <div class="controls">
       <h3>Controls</h3>
-      
+
       <div class="control-group">
         <label for="progress">Progress (Manual Control)</label>
         <input type="range" id="progress" min="0" max="100" value="0">
         <div class="value-display">Progress: <span id="progress-value">0</span>%</div>
       </div>
-      
+
       <div class="control-group">
         <label for="light-x">Light X Position</label>
         <input type="range" id="light-x" min="0" max="100" value="50">
         <div class="value-display">X: <span id="light-x-value">0.50</span></div>
       </div>
-      
+
       <div class="control-group">
         <label for="light-y">Light Y Position</label>
         <input type="range" id="light-y" min="0" max="100" value="50">
         <div class="value-display">Y: <span id="light-y-value">0.50</span></div>
       </div>
-      
+
       <div class="control-group">
         <label for="light-z">Light Z Height</label>
         <input type="range" id="light-z" min="50" max="400" value="200">
         <div class="value-display">Z: <span id="light-z-value">2.00</span></div>
       </div>
-      
+
       <div class="control-group checkbox-group">
         <input type="checkbox" id="debug-mode">
         <label for="debug-mode" style="margin: 0;">Enable Debug Mode</label>
       </div>
-      
+
       <div>
         <button id="play-btn">▶ Play</button>
         <button id="pause-btn">⏸ Pause</button>
         <button id="reset-btn">⏹ Reset</button>
       </div>
     </div>
-    
+
     <div class="canvas-container">
       <canvas id="demo-canvas" width="800" height="600"></canvas>
     </div>
   </div>
-  
+
   <script type="module">
-    // Import the modules we need
-    import { createCanvasManager } from '../packages/lib/src/core/canvas.ts';
-    import { createShadowCalculator } from '../packages/lib/src/core/shadow.ts';
-    import { sine } from '../packages/lib/src/core/curves.ts';
-    import { Renderer } from '../packages/lib/src/core/render.ts';
-    
+    // Import the modules we need from the built library
+    import { createCanvasManager, createShadowCalculator, sine, Renderer } from '../packages/lib/dist/index.esm.js';
+
     // Get canvas element
     const canvas = document.getElementById('demo-canvas');
     const ctx = canvas.getContext('2d');
-    
+
     // Create a simple manual progress driver
     class ManualDriver {
       constructor() {
         this.progress = 0;
       }
-      
-      start() {}
-      stop() {}
-      pause() {}
-      resume() {}
+
+      start() { }
+      stop() { }
+      pause() { }
+      resume() { }
       getProgress() { return this.progress; }
-      destroy() {}
+      destroy() { }
       setProgress(p) { this.progress = p; }
     }
-    
+
     // Create canvas manager wrapper
     const canvasManager = {
       element: canvas,
@@ -186,16 +185,16 @@
       width: 800,
       height: 600,
       dpr: window.devicePixelRatio || 1,
-      resize() {},
+      resize() { },
       toWorldCoords(x, y) {
         return { x: x / 800, y: y / 600 };
       },
       toCSSCoords(x, y) {
         return { x: x * 800, y: y * 600 };
       },
-      destroy() {}
+      destroy() { }
     };
-    
+
     // Initial configuration
     let config = {
       canvas: canvasManager,
@@ -221,49 +220,57 @@
         {
           id: 'zone-1',
           shape: 'circle',
-          bounds: { x: 0.5, y: 0.3, radius: 0.15 }
+          bounds: { x: 0.5, y: 0.3, radius: 0.15 },
+          onEnter: (zone) => console.log('Entered', zone.id),
+          onExit: (zone) => console.log('Exited', zone.id),
+          onClick: (event, zone) => console.log('Clicked', zone.id),
+          onPeak: (z, zone) => console.log('Peak at', z.toFixed(2), 'in', zone.id),
         },
         {
           id: 'zone-2',
           shape: 'rect',
-          bounds: { x: 0.2, y: 0.6, width: 0.3, height: 0.2 }
+          bounds: { x: 0.2, y: 0.6, width: 0.3, height: 0.2 },
+          onEnter: (zone) => console.log('Entered', zone.id),
+          onExit: (zone) => console.log('Exited', zone.id),
+          onClick: (event, zone) => console.log('Clicked', zone.id),
+          onValley: (z, zone) => console.log('Valley at', z.toFixed(2), 'in', zone.id),
         }
       ],
       debug: false,
     };
-    
+
     // Create renderer
     let renderer = new Renderer(config);
-    
+
     // Animation state
     let isPlaying = false;
     let animationId = null;
-    
+
     function animate() {
       if (!isPlaying) return;
-      
+
       // Auto-increment progress
       let currentProgress = config.driver.getProgress();
       currentProgress += 0.005; // Slow animation
       if (currentProgress > 1) currentProgress = 0;
-      
+
       config.driver.setProgress(currentProgress);
       document.getElementById('progress').value = currentProgress * 100;
       document.getElementById('progress-value').textContent = (currentProgress * 100).toFixed(1);
-      
+
       // Manually trigger update and draw
       renderer['update']();
       renderer['draw']();
-      
+
       animationId = requestAnimationFrame(animate);
     }
-    
+
     // Control handlers
     document.getElementById('play-btn').addEventListener('click', () => {
       isPlaying = true;
       animate();
     });
-    
+
     document.getElementById('pause-btn').addEventListener('click', () => {
       isPlaying = false;
       if (animationId) {
@@ -271,7 +278,7 @@
         animationId = null;
       }
     });
-    
+
     document.getElementById('reset-btn').addEventListener('click', () => {
       isPlaying = false;
       if (animationId) {
@@ -284,63 +291,64 @@
       renderer['update']();
       renderer['draw']();
     });
-    
+
     document.getElementById('progress').addEventListener('input', (e) => {
       const value = e.target.value / 100;
       config.driver.setProgress(value);
       document.getElementById('progress-value').textContent = (value * 100).toFixed(1);
-      
+
       if (!isPlaying) {
         renderer['update']();
         renderer['draw']();
       }
     });
-    
+
     document.getElementById('light-x').addEventListener('input', (e) => {
       const value = e.target.value / 100;
       config.light.x = value;
       document.getElementById('light-x-value').textContent = value.toFixed(2);
-      
+
       if (!isPlaying) {
         renderer['update']();
         renderer['draw']();
       }
     });
-    
+
     document.getElementById('light-y').addEventListener('input', (e) => {
       const value = e.target.value / 100;
       config.light.y = value;
       document.getElementById('light-y-value').textContent = value.toFixed(2);
-      
+
       if (!isPlaying) {
         renderer['update']();
         renderer['draw']();
       }
     });
-    
+
     document.getElementById('light-z').addEventListener('input', (e) => {
       const value = e.target.value / 100;
       config.light.z = value;
       document.getElementById('light-z-value').textContent = value.toFixed(2);
-      
+
       if (!isPlaying) {
         renderer['update']();
         renderer['draw']();
       }
     });
-    
+
     document.getElementById('debug-mode').addEventListener('change', (e) => {
       config.debug = e.target.checked;
-      
+
       if (!isPlaying) {
         renderer['update']();
         renderer['draw']();
       }
     });
-    
+
     // Initial render
     renderer['update']();
     renderer['draw']();
   </script>
 </body>
+
 </html>
